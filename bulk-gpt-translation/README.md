@@ -1,5 +1,5 @@
 # Bulk GPT translation
-This script is designed to take input from an excel file, translate the content of a specific column using OpenAI's GPT API, and write the translated content to excel file.
+This script is designed to take input from an excel file, translate the content of a specific column using OpenAI's GPT API, and write the translated content to excel file. Html layout, images and shortcodes are not sent for translation and will be carefully returned to the final result.
 
 ## Installation
 To install the necessary dependencies, run the following command:
