@@ -1,4 +1,4 @@
-#Content Management Tools
+# Content Management Tools
 
 ## Metacritic Parser
 The Metacritic Parser is a tool designed to retrieve and parse ratings from the popular website metacritic.com. It is specifically built as part of a self-updating game rating system for https://www.progamer.ru/top
