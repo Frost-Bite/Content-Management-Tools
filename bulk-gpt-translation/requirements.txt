@@ -2,3 +2,5 @@ openai
 pandas
 openpyxl
 xlsxwriter
+translators
+beautifulsoup4
