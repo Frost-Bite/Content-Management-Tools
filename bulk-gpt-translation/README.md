@@ -15,3 +15,5 @@ python translate.py
 ## Notes
 
 Any parts of the content that were skipped during translation are also recorded in a separate column.
+
+The files 6-translateImgAlts.py and 7-translateImgTitles.py are provided as is, do not forget to change the names of the files to your own.

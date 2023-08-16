@@ -5,15 +5,15 @@ import time
 from datetime import datetime
 
 # Define OpenAI api key
-openai.api_key = 'sk-keyKeykey'
+openai.api_key = 'sk-!xUtQb!kEsCUllLWAmC!T3BlbkFJgIka!wEt6K!cu!dp5U4!'
 
 # Define pattern for tags and shortcodes
 pattern = r'\[.*?\]|{.*?}|<\/?[a-zA-Z][^>]*>'
 
 # Define patterns for replacements
 img_pattern = r'<img[^>]*>'
-heading_open_pattern = r'<h[2-5][^>]*>'
-heading_close_pattern = r'</h[2-5]>'
+heading_open_pattern = r'<(h[2-5]|blockquote)[^>]*>'
+heading_close_pattern = r'</(h[2-5]|blockquote)>'
 
 # Get the current date and time
 now = datetime.now()
@@ -24,7 +24,11 @@ filename = 'translatedresults'+date_for_filename+'.xlsx'
 
 # Function to make the API request
 def translate_text(text):
-    while True:
+    max_retries = 5  # Define a maximum number of retries.
+    retry_count = 0
+    common_retry_delay = 10
+
+    while retry_count < max_retries:
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
@@ -63,15 +67,34 @@ def translate_text(text):
 
         except openai.error.RateLimitError as e:
             print(f"Rate limit reached. Error: {str(e)}")
-            print("Rate limit reached. Waiting for 20 seconds before retrying...")
-            time.sleep(20)
+            print(f"Rate limit reached. Waiting for {common_retry_delay} seconds before retrying...")
+            time.sleep(common_retry_delay)
+
+        except openai.error.Timeout as e:
+            print(f"Timeout error: {str(e)}")
+            print(f"Request timed out. Waiting for {common_retry_delay} seconds before retrying...")
+            time.sleep(common_retry_delay)
+
+        except openai.error.ServiceUnavailableError as e:
+            print(f"Service unavailable: {str(e)}")
+            print(f"Server is overloaded or not ready yet. Waiting for {common_retry_delay} seconds before retrying...")
+            time.sleep(common_retry_delay)
 
         except openai.error.APIError as e:
             if e.http_status == 502:
-                print("APIError 502: Bad Gateway. Waiting for 60 seconds before retrying...")
-                time.sleep(60)
+                print(f"APIError 502: Bad Gateway. Waiting for {common_retry_delay} seconds before retrying...")
+                time.sleep(common_retry_delay)
             else:
                 raise e
+        except Exception as e:
+            print(f"An unexpected error occurred: {str(e)}")
+            retry_delay = 10 + (retry_count * 10) + random.uniform(0, 5)  # Add some randomness to the delay
+            print(f"Retrying in {retry_delay} seconds...")
+            time.sleep(retry_delay)
+            retry_count += 1
+
+    print("Max retries reached. Please try again later.")
+    return None
 
 # Read the excel file
 df = pd.read_excel("test1.xlsx", engine='openpyxl')
@@ -108,8 +131,8 @@ for idx, value in df['Content'].items():
         translation = translate_text(piece)
         translations.append(translation)
 
-        # Delay for 10 seconds
-        time.sleep(10)
+        # Delay for 1 seconds
+        time.sleep(1)
 
     # Store skipped parts in the 'Skipped' column
     df.at[idx, 'Skipped'] = "|".join(skipped_parts)
